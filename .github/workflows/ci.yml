@@ -15,11 +15,11 @@ jobs:
       matrix:
         include:
           - os: ubuntu-22.04
-            artifact_path: build/mkl_app
+            artifact_path: build/bin/mkl_app
           - os: windows-2022
-            artifact_path: build/Release/mkl_app.exe
+            artifact_path: build/bin/mkl_app.exe
           - os: macos-14
-            artifact_path: build/mkl_app.app/**
+            artifact_path: build/bin/mkl_app.app/**
     steps:
       - uses: actions/checkout@v4
 

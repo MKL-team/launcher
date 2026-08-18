@@ -43,7 +43,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          $exe = "build\Release\mkl_app.exe"
+          $exe = "build\bin\mkl_app.exe"
           $wdq = Get-Command windeployqt -ErrorAction SilentlyContinue
           if ($wdq) {
             & $wdq.Source --release --no-translations $exe
@@ -53,22 +53,22 @@ jobs:
             & $wdqPath --release --no-translations $exe
           }
           New-Item -ItemType Directory -Force -Path dist | Out-Null
-          Compress-Archive -Path "build\Release\*" -DestinationPath "dist\${{ matrix.asset_name }}" -Force
+          Compress-Archive -Path "build\bin\*" -DestinationPath "dist\${{ matrix.asset_name }}" -Force
 
       - name: Package macOS (deploy Qt + dmg)
         if: runner.os == 'macOS'
         run: |
           DEPLOY=$(command -v macdeployqt || true)
           if [ -z "$DEPLOY" ]; then DEPLOY="$Qt6_DIR/../../../bin/macdeployqt"; fi
-          "$DEPLOY" build/mkl_app.app -always-overwrite
+          "$DEPLOY" build/bin/mkl_app.app -always-overwrite
           mkdir -p dist
-          hdiutil create -volname "MKL" -srcfolder build/mkl_app.app -ov -format UDZO "dist/${{ matrix.asset_name }}"
+          hdiutil create -volname "MKL" -srcfolder build/bin/mkl_app.app -ov -format UDZO "dist/${{ matrix.asset_name }}"
 
       - name: Package Linux (tar.gz)
         if: runner.os == 'Linux'
         run: |
           mkdir -p dist
-          tar -czf "dist/${{ matrix.asset_name }}" -C build mkl_app
+          tar -czf "dist/${{ matrix.asset_name }}" -C build/bin mkl_app
 
       - name: Upload package artifact
         uses: actions/upload-artifact@v4
