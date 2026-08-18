@@ -9,6 +9,11 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+# MSVC 统一按 UTF-8 解析源码（源文件含中文日志/注释）
+if(MSVC)
+  add_compile_options(/utf-8)
+endif()
+
 option(MKL_BUILD_TESTS "Build unit tests" ON)
 
 add_subdirectory(src/core)

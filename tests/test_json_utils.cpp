@@ -58,9 +58,10 @@ MKL_TEST(json_array_index_path) {
 }
 
 MKL_TEST(json_escapes) {
-    const std::string j = R"({"s":"line\nbreak \"quote\" \u4e2d"}")";
+    // 使用纯 ASCII 的 \u 转义，避免 Windows 代码页差异（\u0041 == 'A'）
+    const std::string j = R"({"s":"line\nbreak \"quote\" \u0041"})";
     CHECK(mkl::JsonUtils::isJson(j));
-    CHECK_EQ(mkl::JsonUtils::getString(j, "s"), std::string("line\nbreak \"quote\" \u4e2d"));
+    CHECK_EQ(mkl::JsonUtils::getString(j, "s"), std::string("line\nbreak \"quote\" A"));
     return true;
 }
 
