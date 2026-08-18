@@ -1,0 +1,20 @@
+# 构建产物
+build/
+cmake-build-*/
+*.user
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# 日志
+logs/
+*.log
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# 临时
+*.tmp
