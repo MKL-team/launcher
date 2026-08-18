@@ -13,7 +13,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-2022, macos-14]
+        include:
+          - os: ubuntu-22.04
+            artifact_path: build/mkl_app
+          - os: windows-2022
+            artifact_path: build/Release/mkl_app.exe
+          - os: macos-14
+            artifact_path: build/mkl_app.app/**
     steps:
       - uses: actions/checkout@v4
 
@@ -43,7 +49,4 @@ jobs:
         with:
           name: mkl-app-${{ matrix.os }}
           if-no-files-found: error
-          path: |
-            build/Release/mkl_app.exe
-            build/mkl_app
-            build/mkl_app.app
+          path: ${{ matrix.artifact_path }}
