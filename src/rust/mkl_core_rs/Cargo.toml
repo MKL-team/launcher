@@ -1,0 +1,8 @@
+[package]
+name = "mkl_core_rs"
+version = "0.0.2"
+edition = "2021"
+description = "MKL 核心 Rust 模块（R2 占位）：Minecraft 版本解析与 Java 需求映射；后续承载 DownloadService / AuthService / SelfUpdater / 插件沙箱"
+license = "Proprietary"
+
+[dependencies]

@@ -1,55 +1,42 @@
-#pragma once
+#ifndef MKL_TEST_UTIL_H
+#define MKL_TEST_UTIL_H
 
-#include <functional>
-#include <iostream>
-#include <string>
-#include <vector>
+#include <stdio.h>
+#include <string.h>
 
-// 零依赖迷你测试框架
-namespace mkl_test {
+/* 零依赖迷你测试框架（C11） */
+extern int mkl_test_failures;
 
-struct TestCase {
-    const char* name;
-    std::function<bool()> fn;
-};
+#define MKL_TEST(name) int mkl_test_##name(void)
 
-inline std::vector<TestCase>& registry() {
-    static std::vector<TestCase> r;
-    return r;
-}
-
-struct Registrar {
-    Registrar(const char* name, std::function<bool()> fn) {
-        registry().push_back({name, std::move(fn)});
-    }
-};
-
-inline int failures = 0;
-
-} // namespace mkl_test
-
-#define MKL_TEST(name)                                                    \
-    static bool mkl_test_fn_##name();                                     \
-    static ::mkl_test::Registrar mkl_test_reg_##name(#name, mkl_test_fn_##name); \
-    static bool mkl_test_fn_##name()
-
-#define CHECK(cond)                                                        \
-    do {                                                                   \
-        if (!(cond)) {                                                     \
-            ::mkl_test::failures++;                                        \
-            std::cerr << "  FAIL " << __FILE__ << ":" << __LINE__          \
-                      << ": " #cond << std::endl;                          \
-        }                                                                  \
+#define CHECK(cond)                                                              \
+    do {                                                                         \
+        if (!(cond)) {                                                           \
+            mkl_test_failures++;                                                 \
+            fprintf(stderr, "  FAIL %s:%d: %s\n", __FILE__, __LINE__, #cond);    \
+        }                                                                        \
     } while (0)
 
-#define CHECK_EQ(a, b)                                                     \
-    do {                                                                   \
-        const auto va = (a);                                               \
-        const auto vb = (b);                                               \
-        if (!(va == vb)) {                                                 \
-            ::mkl_test::failures++;                                        \
-            std::cerr << "  FAIL " << __FILE__ << ":" << __LINE__          \
-                      << ": " #a " == " #b " (got: " << va << " vs "       \
-                      << vb << ")" << std::endl;                           \
-        }                                                                  \
+#define CHECK_EQ_INT(a, b)                                                       \
+    do {                                                                         \
+        long long va_ = (long long)(a), vb_ = (long long)(b);                    \
+        if (va_ != vb_) {                                                        \
+            mkl_test_failures++;                                                 \
+            fprintf(stderr, "  FAIL %s:%d: %s == %s (got %lld vs %lld)\n",       \
+                    __FILE__, __LINE__, #a, #b, va_, vb_);                       \
+        }                                                                        \
     } while (0)
+
+#define CHECK_EQ_STR(a, b)                                                       \
+    do {                                                                         \
+        const char* va_ = (a);                                                   \
+        const char* vb_ = (b);                                                   \
+        if (!va_ || !vb_ || strcmp(va_, vb_) != 0) {                             \
+            mkl_test_failures++;                                                 \
+            fprintf(stderr, "  FAIL %s:%d: %s == %s (got \"%s\" vs \"%s\")\n",   \
+                    __FILE__, __LINE__, #a, #b, va_ ? va_ : "(null)",            \
+                    vb_ ? vb_ : "(null)");                                       \
+        }                                                                        \
+    } while (0)
+
+#endif /* MKL_TEST_UTIL_H */
