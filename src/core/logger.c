@@ -36,6 +36,7 @@ typedef pthread_mutex_t mkl_mutex;
 #endif
 
 typedef struct mkl_log_sink {
+    int id;
     mkl_log_sink_fn fn;
     void* userdata;
 } mkl_log_sink;
@@ -49,6 +50,7 @@ typedef struct mkl_logger_state {
     int ring_count;
     mkl_log_sink sinks[16];
     int sink_count;
+    int next_sink_id;
     mkl_fatal_handler_fn fatal_handler;
     void* fatal_userdata;
     int initialized;
@@ -94,6 +96,7 @@ int mkl_logger_init(const char* file_path) {
     s_logger.file = NULL;
     s_logger.ring_count = 0;
     s_logger.sink_count = 0;
+    s_logger.next_sink_id = 0;
     s_logger.fatal_handler = NULL;
     s_logger.fatal_userdata = NULL;
     s_logger.initialized = 1;
@@ -202,12 +205,33 @@ void mkl_logger_flush(void) {
     mkl_mutex_unlock(&s_logger.mutex);
 }
 
-void mkl_logger_subscribe(mkl_log_sink_fn sink, void* userdata) {
+int mkl_logger_subscribe(mkl_log_sink_fn sink, void* userdata) {
     mkl_mutex_lock(&s_logger.mutex);
     if (s_logger.sink_count < 16) {
+        int id = ++s_logger.next_sink_id;
+        s_logger.sinks[s_logger.sink_count].id = id;
         s_logger.sinks[s_logger.sink_count].fn = sink;
         s_logger.sinks[s_logger.sink_count].userdata = userdata;
         s_logger.sink_count++;
+        mkl_mutex_unlock(&s_logger.mutex);
+        return id;
+    }
+    mkl_mutex_unlock(&s_logger.mutex);
+    return -1;
+}
+
+void mkl_logger_unsubscribe(int id) {
+    mkl_mutex_lock(&s_logger.mutex);
+    for (int i = 0; i < s_logger.sink_count; ++i) {
+        if (s_logger.sinks[i].id == id) {
+            size_t rest = (size_t)(s_logger.sink_count - i - 1);
+            if (rest > 0) {
+                memmove(&s_logger.sinks[i], &s_logger.sinks[i + 1],
+                        sizeof(mkl_log_sink) * rest);
+            }
+            s_logger.sink_count--;
+            break;
+        }
     }
     mkl_mutex_unlock(&s_logger.mutex);
 }

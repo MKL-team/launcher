@@ -22,7 +22,9 @@ void mkl_logger_set_min_console_level(mkl_log_level level);
 void mkl_logger_log(mkl_log_level level, const char* file, int line, const char* fmt, ...);
 void mkl_logger_flush(void);
 
-void mkl_logger_subscribe(mkl_log_sink_fn sink, void* userdata);
+/* 订阅实时日志；返回订阅 id（-1 表示失败），配合 mkl_logger_unsubscribe 使用 */
+int mkl_logger_subscribe(mkl_log_sink_fn sink, void* userdata);
+void mkl_logger_unsubscribe(int id);
 /* 最近 N 行（FATAL 弹窗需要最近 50 行）；返回实际拷贝行数 */
 int mkl_logger_recent_lines(char (*out)[512], int max_lines);
 void mkl_logger_set_fatal_handler(mkl_fatal_handler_fn handler, void* userdata);

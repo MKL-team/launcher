@@ -31,18 +31,23 @@ MKL_TEST(logger_file) {
     return 1;
 }
 
+/* 订阅回调：用静态计数器，避免悬垂指针（userdata 指向已失效栈帧是 UB） */
+static int s_received = 0;
+
 static void log_count_cb(mkl_log_level level, const char* line, void* userdata) {
     (void)level;
     (void)line;
-    int* p = (int*)userdata;
-    (*p)++;
+    (void)userdata;
+    s_received++;
 }
 
 MKL_TEST(logger_subscribe) {
-    int received = 0;
-    mkl_logger_subscribe(log_count_cb, &received);
+    s_received = 0;
+    int sid = mkl_logger_subscribe(log_count_cb, NULL);
+    CHECK(sid >= 0);
     mkl_logger_log(MKL_LOG_LEVEL_DEBUG, "t", 1, "subscribe check");
-    CHECK(received >= 1);
+    CHECK(s_received >= 1);
+    mkl_logger_unsubscribe(sid);
     return 1;
 }
 
