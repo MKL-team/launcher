@@ -1,3 +1,8 @@
+/* 需要 POSIX 声明（localtime_r）：-std=c11 下默认不可见 */
+#if !defined(_WIN32)
+#define _POSIX_C_SOURCE 200809L
+#endif
+
 #include "logger.h"
 
 #include <stdarg.h>

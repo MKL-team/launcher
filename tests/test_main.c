@@ -49,22 +49,26 @@ static mkl_test_case tests[] = {
 };
 
 int main(void) {
+    /* stdout 设为无缓冲：崩溃时也能看到已通过的测试进度 */
+    setvbuf(stdout, NULL, _IONBF, 0);
     int failed = 0;
     size_t n = sizeof(tests) / sizeof(tests[0]);
     for (size_t i = 0; i < n; ++i) {
+        fprintf(stderr, "[RUN ] %s\n", tests[i].name);
         int before = mkl_test_failures;
         int ok = tests[i].fn();
-        if (!ok || mkl_test_failures != before) {
-            printf("[FAIL] %s\n", tests[i].name);
+        int after = mkl_test_failures;
+        if (!ok || after != before) {
+            fprintf(stderr, "[FAIL] %s\n", tests[i].name);
             failed++;
         } else {
-            printf("[ OK ] %s\n", tests[i].name);
+            fprintf(stderr, "[ OK ] %s\n", tests[i].name);
         }
     }
     if (failed == 0 && mkl_test_failures == 0) {
-        printf("ALL TESTS PASSED\n");
+        fprintf(stderr, "ALL TESTS PASSED\n");
         return 0;
     }
-    printf("TESTS FAILED (assertions=%d)\n", mkl_test_failures);
+    fprintf(stderr, "TESTS FAILED (assertions=%d)\n", mkl_test_failures);
     return 1;
 }

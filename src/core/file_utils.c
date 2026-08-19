@@ -1,3 +1,7 @@
+#if !defined(_WIN32)
+#define _POSIX_C_SOURCE 200809L
+#endif
+
 #include "file_utils.h"
 
 #include <stdint.h>
@@ -291,8 +295,9 @@ int mkl_file_sha1(const char* path, char out_hex[41]) {
     for (size_t i = (size_t)size + 1; i < msg_len - 8; ++i) {
         msg[i] = 0x00;
     }
-    for (int i = 7; i >= 0; --i) {
-        msg[msg_len - 8 + (size_t)i] = (uint8_t)((bitlen >> (i * 8)) & 0xFF);
+    /* 64 位大端比特长度：LSB 在最后一个字节（msg[msg_len-1]），MSB 在 msg[msg_len-8] */
+    for (int i = 0; i < 8; ++i) {
+        msg[msg_len - 1 - i] = (uint8_t)((bitlen >> (i * 8)) & 0xFF);
     }
 
     uint32_t h0 = 0x67452301, h1 = 0xEFCDAB89, h2 = 0x98BADCFE, h3 = 0x10325476,
