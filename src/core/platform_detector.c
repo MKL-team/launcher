@@ -5,6 +5,7 @@
 #include "platform_detector.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #if defined(_WIN32)
